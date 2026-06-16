@@ -1,0 +1,6 @@
+# Gitleaks Configuration for starlight-command
+[allowlist]
+description = "Allow common prose keywords from triggering alerts"
+regexes = [
+  '(?i)\b(token|tokens|cookie|api_key)\b'
+]

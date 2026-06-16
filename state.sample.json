@@ -1,0 +1,222 @@
+{
+  "$schema": "https://example.com/schemas/command-center.v1.json",
+  "meta": {
+    "version": "1.0.0",
+    "generated": "2026-06-16",
+    "owner": "operator",
+    "note": "Sample operational ledger for the Command Center template."
+  },
+  "kpis": {
+    "repos_total": 12,
+    "repos_active": 8,
+    "repos_attention": 2,
+    "sessions_7d": 4,
+    "prompts_logged": 3,
+    "eval_avg_30d": 85.0,
+    "open_followups": 3,
+    "deploys_live": 2,
+    "monthly_run_cost_usd": 120
+  },
+  "attention": [
+    {
+      "id": "att-1",
+      "sev": "high",
+      "repo": "repo-a",
+      "what": "Local branch is out of sync with origin",
+      "action": "git pull origin main and reconcile",
+      "owner": "operator",
+      "since": "2026-06-15"
+    },
+    {
+      "id": "att-2",
+      "sev": "med",
+      "repo": "repo-b",
+      "what": "Uncommitted changes in workflow module",
+      "action": "Commit and push current changes",
+      "owner": "agent",
+      "since": "2026-06-16"
+    }
+  ],
+  "harnesses": [
+    {
+      "id": "claude-code",
+      "name": "Claude Code",
+      "model": "Sonnet",
+      "role": "Primary development partner",
+      "status": "active",
+      "sessions_7d": 3,
+      "eval_avg": 88.0,
+      "cost_30d_usd": 40,
+      "tier": "primary"
+    },
+    {
+      "id": "antigravity",
+      "name": "Antigravity",
+      "model": "Gemini",
+      "role": "Swarm orchestration partner",
+      "status": "active",
+      "sessions_7d": 1,
+      "eval_avg": 82.0,
+      "cost_30d_usd": 0,
+      "tier": "swarm"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "s-20260616-cla",
+      "date": "2026-06-16",
+      "harness": "claude-code",
+      "repo": "repo-a",
+      "scope": "Setup basic template repository and structure",
+      "files": [
+        "README.md",
+        "LICENSE"
+      ],
+      "credits": 0,
+      "eval": 90,
+      "status": "shipped"
+    },
+    {
+      "id": "s-20260615-ant",
+      "date": "2026-06-15",
+      "harness": "antigravity",
+      "repo": "repo-b",
+      "scope": "Refactor interface components for simplicity",
+      "files": [
+        "index.html",
+        "style.css"
+      ],
+      "credits": 0,
+      "eval": 85,
+      "status": "shipped"
+    },
+    {
+      "id": "s-20260614-cla",
+      "date": "2026-06-14",
+      "harness": "claude-code",
+      "repo": "repo-a",
+      "scope": "Implement core test suite and CI validation",
+      "files": [
+        "test/suite.js"
+      ],
+      "credits": 0,
+      "eval": 80,
+      "status": "shipped"
+    }
+  ],
+  "prompts": [
+    {
+      "id": "p-1",
+      "date": "2026-06-16",
+      "harness": "claude-code",
+      "label": "Setup repository structure and ignore files",
+      "model_graded": "n/a",
+      "eval": 90,
+      "category": "ops",
+      "notes": "Initial setup"
+    },
+    {
+      "id": "p-2",
+      "date": "2026-06-15",
+      "harness": "antigravity",
+      "label": "Refactor page style.css styling",
+      "model_graded": "n/a",
+      "eval": 85,
+      "category": "style",
+      "notes": "Clean style sheet"
+    }
+  ],
+  "evals": {
+    "rubric": "evals/RUBRIC.md",
+    "grader_model": "haiku",
+    "history": [
+      {
+        "date": "2026-06-15",
+        "score": 85,
+        "dim": "correctness",
+        "harness": "antigravity"
+      },
+      {
+        "date": "2026-06-16",
+        "score": 90,
+        "dim": "correctness",
+        "harness": "claude-code"
+      }
+    ],
+    "note": "Standardized agent rubric results."
+  },
+  "portfolio": {
+    "brands": [
+      {
+        "name": "BrandA",
+        "role": "Primary product",
+        "color": "tech",
+        "revenue": "SaaS subscription",
+        "repos": 4,
+        "deploys": [
+          "example.com"
+        ]
+      },
+      {
+        "name": "BrandB",
+        "role": "Open source tool",
+        "color": "soul",
+        "revenue": "donations",
+        "repos": 2,
+        "deploys": []
+      }
+    ],
+    "deploys": [
+      {
+        "domain": "example.com",
+        "host": "Vercel",
+        "repo": "repo-a",
+        "stack": "Next.js",
+        "status": "live"
+      }
+    ]
+  },
+  "projects": [
+    {
+      "id": "pr-1",
+      "name": "Project Alpha",
+      "brand": "BrandA",
+      "tracker": "Linear",
+      "stack": "React",
+      "status": "in-progress",
+      "blocker": null,
+      "cost_mo_usd": 40
+    },
+    {
+      "id": "pr-2",
+      "name": "Project Beta",
+      "brand": "BrandB",
+      "tracker": "GitHub",
+      "stack": "Node.js",
+      "status": "planning",
+      "blocker": null,
+      "cost_mo_usd": 0
+    }
+  ],
+  "costs": {
+    "currency": "USD",
+    "monthly": [
+      {
+        "category": "Hosting",
+        "amount": 40,
+        "notes": "Vercel plan"
+      },
+      {
+        "category": "APIs",
+        "amount": 80,
+        "notes": "Model provider APIs"
+      }
+    ],
+    "projection_note": "Sample costs projection."
+  },
+  "review": {
+    "cadence": "Weekly review",
+    "interconnectedness_note": "Sample connection mapping.",
+    "next_review": "2026-06-21"
+  }
+}

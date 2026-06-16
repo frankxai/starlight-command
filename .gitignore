@@ -1,0 +1,12 @@
+# Local state files containing active private logs
+state.json
+ecosystem.json
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+handovers/sessions.jsonl
+handovers/raw/

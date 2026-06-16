@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Starlight Command Center</title>
+<style>
+  :root{
+    --void:#0a0a0b; --space:#111113; --elevated:#1a1a1f; --surface:#15161c;
+    --border:#1f1f24; --border-strong:#2c2c33;
+    --tech:#10b981; --tech2:#06b6d4; --soul:#f59e0b; --soul2:#fbbf24;
+    --arc:#c5a26f; --indigo:#7c6bd6; --crimson:#e0655a;
+    --ink:#f3f4f8; --muted:#a0a3b0; --subtle:#6f7280; --faint:#474955;
+    --green:#10b981; --yellow:#d2a84a; --red:#e0655a; --blue:#06b6d4; --violet:#9a7bef;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:'Inter',ui-sans-serif,-apple-system,Segoe UI,Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:
+      radial-gradient(1100px 700px at 78% -12%, #14241f 0, transparent 55%),
+      radial-gradient(900px 600px at 10% 110%, #1c1707 0, transparent 50%),
+      var(--void);
+    color:var(--ink); font:14px/1.55 var(--sans); display:flex; min-height:100%}
+  a{color:var(--tech2);text-decoration:none}
+
+  /* sidebar */
+  .nav{width:228px;flex:0 0 228px;border-right:1px solid var(--border);padding:22px 14px;position:sticky;top:0;height:100vh;overflow:auto;background:rgba(10,10,11,.6);backdrop-filter:blur(6px)}
+  .brand{display:flex;align-items:center;gap:10px;margin:0 6px 22px}
+  .logo{width:30px;height:30px;border-radius:8px;background:conic-gradient(from 200deg,var(--tech),var(--tech2),var(--soul),var(--tech));box-shadow:0 0 18px rgba(16,185,129,.45)}
+  .brand b{font-size:14px;letter-spacing:.3px}
+  .brand small{display:block;color:var(--subtle);font-size:10px;letter-spacing:1.5px;text-transform:uppercase}
+  .navlink{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;color:var(--muted);cursor:pointer;font-size:13px;margin-bottom:2px;border:1px solid transparent}
+  .navlink:hover{background:var(--space);color:var(--ink)}
+  .navlink.on{background:linear-gradient(90deg,rgba(16,185,129,.16),rgba(6,182,212,.05));color:#fff;border-color:rgba(16,185,129,.3)}
+  .navlink .dot{width:7px;height:7px;border-radius:50%;background:var(--faint)}
+  .navlink.on .dot{background:var(--tech);box-shadow:0 0 8px var(--tech)}
+  .navsec{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--faint);margin:18px 12px 7px}
+
+  /* main */
+  main{flex:1;padding:26px 34px 80px;max-width:1320px;min-width:0}
+  .top{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:22px}
+  h1{font-size:25px;margin:0;letter-spacing:.2px}
+  h1 .g{background:linear-gradient(90deg,var(--tech),var(--tech2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--muted);font-size:12.5px;margin:4px 0 0}
+  .clock{font-family:var(--mono);font-size:12px;color:var(--subtle);text-align:right}
+  .clock b{color:var(--tech2);font-size:15px;display:block}
+
+  .page{display:none} .page.on{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  h2{font-size:12px;text-transform:uppercase;letter-spacing:1.6px;color:var(--tech2);margin:30px 0 13px;display:flex;align-items:center;gap:9px}
+  h2::before{content:"";width:14px;height:1px;background:var(--tech2);opacity:.6}
+  h2:first-of-type{margin-top:6px}
+
+  .grid{display:grid;gap:13px}
+  .k4{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+  .k3{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+  .k2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+
+  .card{background:linear-gradient(180deg,var(--space),var(--void));border:1px solid var(--border);border-radius:13px;padding:16px 18px}
+  .kpi .n{font-size:27px;font-weight:700;font-family:var(--mono);letter-spacing:-.5px}
+  .kpi .l{color:var(--subtle);font-size:10.5px;text-transform:uppercase;letter-spacing:.8px;margin-top:3px}
+  .kpi .d{font-size:11px;margin-top:6px}
+  .up{color:var(--green)} .down{color:var(--red)} .flat{color:var(--subtle)}
+
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--border);font-size:12.5px;vertical-align:top}
+  th{color:var(--subtle);font-weight:600;font-size:9.5px;text-transform:uppercase;letter-spacing:1px}
+  tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:rgba(255,255,255,.018)}
+  .tbl{background:linear-gradient(180deg,var(--space),var(--void));border:1px solid var(--border);border-radius:13px;overflow:hidden}
+  .mono{font-family:var(--mono)}
+
+  .pill{display:inline-block;padding:2px 9px;border-radius:30px;font-size:10.5px;font-weight:600;white-space:nowrap;font-family:var(--mono)}
+  .p-green{background:rgba(16,185,129,.14);color:var(--green)}
+  .p-yellow{background:rgba(210,168,74,.16);color:var(--yellow)}
+  .p-red{background:rgba(224,101,90,.15);color:var(--red)}
+  .p-blue{background:rgba(6,182,212,.14);color:var(--blue)}
+  .p-violet{background:rgba(154,123,239,.15);color:var(--violet)}
+  .p-gray{background:rgba(255,255,255,.05);color:var(--subtle)}
+  .p-gold{background:rgba(197,162,111,.16);color:var(--arc)}
+
+  .att{display:flex;gap:13px;align-items:flex-start;padding:13px 15px;border-radius:11px;border:1px solid var(--border);background:var(--space);margin-bottom:9px;border-left-width:3px}
+  .att.high{border-left-color:var(--red)} .att.med{border-left-color:var(--yellow)} .att.low{border-left-color:var(--blue)}
+  .att .ic{font-size:16px;line-height:1.2}
+  .att .body{flex:1;min-width:0}
+  .att .repo{font-family:var(--mono);font-size:12px;color:var(--ink);font-weight:600}
+  .att .what{font-size:12.5px;color:var(--ink);margin:2px 0}
+  .att .act{font-size:11.5px;color:var(--muted)}
+  .att .meta{font-size:10px;color:var(--subtle);text-align:right;font-family:var(--mono);white-space:nowrap}
+
+  .bar{height:7px;border-radius:6px;background:var(--elevated);overflow:hidden;margin-top:6px}
+  .bar > i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--tech),var(--tech2))}
+  .spark{display:flex;align-items:flex-end;gap:3px;height:34px}
+  .spark > i{flex:1;border-radius:2px 2px 0 0;background:linear-gradient(180deg,var(--tech),rgba(16,185,129,.3));min-height:3px}
+
+  .fleet{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:13px}
+  .agent{position:relative;overflow:hidden}
+  .agent .hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .agent .nm{font-weight:700;font-size:14px}
+  .agent .mdl{font-family:var(--mono);font-size:10.5px;color:var(--subtle)}
+  .agent .rl{font-size:11.5px;color:var(--muted);min-height:32px;margin:6px 0 10px}
+  .agent .stats{display:flex;gap:14px;font-family:var(--mono);font-size:11px;color:var(--subtle)}
+  .agent .stats b{display:block;color:var(--ink);font-size:14px}
+
+  .flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:6px}
+  .step{background:var(--space);border:1px solid var(--border);border-radius:11px;padding:13px;position:relative}
+  .step .no{font-family:var(--mono);font-size:10px;color:var(--tech);font-weight:700}
+  .step .ti{font-weight:600;font-size:13px;margin:4px 0 5px}
+  .step .de{font-size:11px;color:var(--muted)}
+  .step .who{font-family:var(--mono);font-size:9.5px;color:var(--subtle);margin-top:8px}
+
+  textarea,input,select{width:100%;background:var(--void);border:1px solid var(--border-strong);border-radius:9px;color:var(--ink);font:13px var(--sans);padding:11px 13px;resize:vertical}
+  textarea{font-family:var(--mono);font-size:12px;line-height:1.5}
+  .btn{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(90deg,var(--tech),#0c9b6e);color:#04130d;border:none;border-radius:9px;padding:10px 18px;font-weight:700;font-size:13px;cursor:pointer}
+  .btn:hover{filter:brightness(1.08)}
+  .btn.ghost{background:var(--elevated);color:var(--ink);border:1px solid var(--border-strong)}
+  .out{background:var(--void);border:1px solid var(--border);border-radius:9px;padding:13px;font-family:var(--mono);font-size:11.5px;white-space:pre-wrap;color:var(--tech2);max-height:340px;overflow:auto}
+  .hint{font-size:11.5px;color:var(--subtle)}
+  .lead{color:var(--muted);font-size:13px;max-width:760px;border-left:2px solid var(--tech);padding-left:14px;margin:0 0 20px}
+  .tag{font-family:var(--mono);font-size:10px;color:var(--subtle)}
+  footer{margin-top:38px;border-top:1px solid var(--border);padding-top:14px;color:var(--subtle);font-size:11px;font-family:var(--mono)}
+  .src{font-size:10.5px;color:var(--faint)}
+  .row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+  .badge{font-family:var(--mono);font-size:10px;padding:1px 7px;border-radius:5px;background:var(--elevated);color:var(--subtle)}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="brand"><div class="logo"></div><div><b>Command Center</b><small>Starlight Ops</small></div></div>
+  <div class="navsec">Operate</div>
+  <div class="navlink on" data-p="overview"><span class="dot"></span>Overview</div>
+  <div class="navlink" data-p="fleet"><span class="dot"></span>Agent Fleet</div>
+  <div class="navlink" data-p="sessions"><span class="dot"></span>Sessions &amp; Handovers</div>
+  <div class="navlink" data-p="prompts"><span class="dot"></span>Prompts &amp; Evals</div>
+  <div class="navsec">Portfolio</div>
+  <div class="navlink" data-p="portfolio"><span class="dot"></span>Brands &amp; Deploys</div>
+  <div class="navlink" data-p="projects"><span class="dot"></span>Projects &amp; Cost</div>
+  <div class="navsec">System</div>
+  <div class="navlink" data-p="workflow"><span class="dot"></span>Workflow</div>
+  <div class="navlink" data-p="ingest"><span class="dot"></span>Ingest Handover</div>
+</nav>
+
+<main>
+  <div class="top">
+    <div>
+      <h1>Starlight <span class="g">Command Center</span></h1>
+      <p class="sub" id="sub">One operator · three brands · one substrate — observe the fleet, track every prompt, grade every output, ship.</p>
+    </div>
+    <div class="clock"><b id="t-time">—</b><span id="t-date">—</span></div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <section class="page on" id="overview">
+    <h2>Needs you now</h2>
+    <div id="attention"></div>
+    <h2>Pulse</h2>
+    <div class="grid k4" id="kpis"></div>
+    <div class="grid k2" style="margin-top:13px">
+      <div class="card">
+        <div class="row" style="justify-content:space-between"><b style="font-size:13px">Eval trend (30d)</b><span class="tag" id="eval-tag"></span></div>
+        <div class="spark" id="eval-spark" style="margin-top:12px"></div>
+        <div class="hint" style="margin-top:8px">Higgsfield virality scores. Standardized agent-output rubric rolling out — graded by Haiku, escalated to Sonnet on disagreement.</div>
+      </div>
+      <div class="card">
+        <div class="row" style="justify-content:space-between"><b style="font-size:13px">Monthly run cost</b><span class="tag">USD</span></div>
+        <div id="cost-bars" style="margin-top:12px"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FLEET -->
+  <section class="page" id="fleet">
+    <p class="lead">Six harnesses, one ledger. Each agent declares scope on its own branch (<span class="mono">agent/&lt;harness&gt;/&lt;scope&gt;</span>); git is the coordination layer. Draft on free engines, finalize on premium, route grading to Haiku.</p>
+    <h2>Coding &amp; production fleet</h2>
+    <div class="fleet" id="fleet-cards"></div>
+    <h2>Routing doctrine</h2>
+    <div class="card">
+      <table><thead><tr><th>Work type</th><th>Route to</th><th>Why</th></tr></thead><tbody id="routing"></tbody></table>
+    </div>
+  </section>
+
+  <!-- SESSIONS -->
+  <section class="page" id="sessions">
+    <p class="lead">Every agent session lands here as a row — what was touched, what it cost, how it scored, where the handover lives. Paste a handover in <a onclick="go('ingest')">Ingest</a> and it appends here automatically.</p>
+    <h2>Recent sessions</h2>
+    <div class="tbl"><table><thead><tr><th>Date</th><th>Harness</th><th>Repo</th><th>Scope</th><th>Files</th><th>Cost</th><th>Eval</th><th>Status</th></tr></thead><tbody id="sessions-body"></tbody></table></div>
+  </section>
+
+  <!-- PROMPTS -->
+  <section class="page" id="prompts">
+    <p class="lead">The prompt log is the experiment log. Every prompt given to a coding/production agent is recorded with the output's eval score, so you can see which prompts actually work and iterate the winners.</p>
+    <h2>Prompt &amp; eval log</h2>
+    <div class="tbl"><table><thead><tr><th>Date</th><th>Harness</th><th>Prompt</th><th>Category</th><th>Eval</th><th>Notes</th></tr></thead><tbody id="prompts-body"></tbody></table></div>
+    <h2>Eval rubric</h2>
+    <div class="card" id="rubric-card"></div>
+  </section>
+
+  <!-- PORTFOLIO -->
+  <section class="page" id="portfolio">
+    <p class="lead">Brands → revenue → deploys. Full repo graph lives in <span class="mono">dashboard.html</span> (ecosystem viz); this is the operational rollup.</p>
+    <h2>Brands</h2>
+    <div class="grid k3" id="brand-cards"></div>
+    <h2>Live deployments</h2>
+    <div class="tbl"><table><thead><tr><th>Domain</th><th>Host</th><th>Repo</th><th>Stack</th><th>Status</th></tr></thead><tbody id="deploys-body"></tbody></table></div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section class="page" id="projects">
+    <p class="lead">Active builds across the portfolio with their tracker, stack, blocker and monthly cost. System-of-record: <b>Linear</b> = execution issues, <b>GitHub</b> = code truth, <b>Notion</b> = narrative/strategy, <b>this ledger</b> = agent sessions+evals.</p>
+    <h2>Active projects</h2>
+    <div class="tbl"><table><thead><tr><th>Project</th><th>Brand</th><th>Tracker</th><th>Stack</th><th>Status</th><th>Blocker</th><th>$/mo</th></tr></thead><tbody id="projects-body"></tbody></table></div>
+    <h2>Cost projection</h2>
+    <div class="card"><table><thead><tr><th>Category</th><th>USD/mo</th><th>Notes</th></tr></thead><tbody id="costs-body"></tbody></table>
+      <div class="hint" id="cost-note" style="margin-top:12px"></div>
+    </div>
+  </section>
+
+  <!-- WORKFLOW -->
+  <section class="page" id="workflow">
+    <p class="lead">The session lifecycle. Standard prompts in <span class="mono">command-center/prompts/</span>. Cheap models do the plumbing (ingest, grade, summarize); expensive models do the thinking.</p>
+    <h2>Session lifecycle</h2>
+    <div class="flow" id="flow"></div>
+    <h2>Model routing for cost control</h2>
+    <div class="grid k3">
+      <div class="card"><b class="mono" style="color:var(--tech)">HAIKU</b><div class="hint" style="margin-top:7px">Ingest handovers, grade evals, summarize sessions, classify, extract. High-volume plumbing. ~$0.001 / pass.</div></div>
+      <div class="card"><b class="mono" style="color:var(--soul)">SONNET</b><div class="hint" style="margin-top:7px">Synthesis, eval disagreement escalation, drafting, mid-complexity code. The workhorse.</div></div>
+      <div class="card"><b class="mono" style="color:var(--blue)">OPUS</b><div class="hint" style="margin-top:7px">Architecture, governance, substrate decisions, this Command Center. Reserve for irreversible / high-leverage calls.</div></div>
+    </div>
+    <h2>Improvement loop</h2>
+    <div class="card" id="review-card"></div>
+  </section>
+
+  <!-- INGEST -->
+  <section class="page" id="ingest">
+    <p class="lead">Paste a handover (any format — the markdown session-log style you already use works). This generates a structured ledger entry you append to <span class="mono">state.json → sessions[]</span>. In Cowork, ask Claude to run the ingest with Haiku to do it + grade automatically.</p>
+    <h2>Handover → ledger entry</h2>
+    <div class="grid k2">
+      <div>
+        <div class="row" style="margin-bottom:8px">
+          <select id="i-harness" style="width:auto"><option value="claude-code">Claude Code</option><option value="codex">Codex</option><option value="antigravity">Antigravity</option><option value="grok">Grok</option><option value="opencode">OpenCode</option><option value="deepagents">deepagents</option></select>
+          <input id="i-repo" placeholder="repo (e.g. brandc-ai-app)" style="width:auto;flex:1;min-width:160px">
+        </div>
+        <textarea id="i-text" rows="14" placeholder="Paste handover / session log here..."></textarea>
+        <div class="row" style="margin-top:10px"><button class="btn" onclick="ingest()">⊕ Generate entry</button><button class="btn ghost" onclick="copyOut()">Copy JSON</button></div>
+      </div>
+      <div>
+        <div class="hint" style="margin-bottom:8px">Generated <span class="mono">sessions[]</span> entry:</div>
+        <div class="out" id="i-out">// awaiting paste…</div>
+        <div class="hint" style="margin-top:12px">Then: append to <span class="mono">state.json</span>, drop the raw paste in <span class="mono">command-center/handovers/&lt;date&gt;-&lt;harness&gt;.md</span>, and the cockpit picks it up on reload.</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Reads <span style="color:var(--tech2)">command-center/state.json</span> · falls back to embedded snapshot · <span id="f-gen"></span> ·
+    pairs with <span style="color:var(--tech2)">dashboard.html</span> (ecosystem graph) &amp; <span style="color:var(--tech2)">ecosystem.json</span> (source of truth)
+    <div class="src" style="margin-top:6px">Sources: state.json · ecosystem.json · design.md · higgsfield-handover.md</div>
+  </footer>
+</main>
+
+<script>
+// ---- embedded fallback (so double-click works with no server) ----
+const FALLBACK = {
+  "$schema": "https://example.com/schemas/command-center.v1.json",
+  "meta": {
+    "version": "1.0.0",
+    "generated": "2026-06-16",
+    "owner": "operator",
+    "note": "Sample operational ledger for the Command Center template."
+  },
+  "kpis": {
+    "repos_total": 12,
+    "repos_active": 8,
+    "repos_attention": 2,
+    "sessions_7d": 4,
+    "prompts_logged": 3,
+    "eval_avg_30d": 85.0,
+    "open_followups": 3,
+    "deploys_live": 2,
+    "monthly_run_cost_usd": 120
+  },
+  "attention": [
+    {
+      "id": "att-1",
+      "sev": "high",
+      "repo": "repo-a",
+      "what": "Local branch is out of sync with origin",
+      "action": "git pull origin main and reconcile",
+      "owner": "operator",
+      "since": "2026-06-15"
+    },
+    {
+      "id": "att-2",
+      "sev": "med",
+      "repo": "repo-b",
+      "what": "Uncommitted changes in workflow module",
+      "action": "Commit and push current changes",
+      "owner": "agent",
+      "since": "2026-06-16"
+    }
+  ],
+  "harnesses": [
+    {
+      "id": "claude-code",
+      "name": "Claude Code",
+      "model": "Sonnet",
+      "role": "Primary development partner",
+      "status": "active",
+      "sessions_7d": 3,
+      "eval_avg": 88.0,
+      "cost_30d_usd": 40,
+      "tier": "primary"
+    },
+    {
+      "id": "antigravity",
+      "name": "Antigravity",
+      "model": "Gemini",
+      "role": "Swarm orchestration partner",
+      "status": "active",
+      "sessions_7d": 1,
+      "eval_avg": 82.0,
+      "cost_30d_usd": 0,
+      "tier": "swarm"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "s-20260616-cla",
+      "date": "2026-06-16",
+      "harness": "claude-code",
+      "repo": "repo-a",
+      "scope": "Setup basic template repository and structure",
+      "files": [
+        "README.md",
+        "LICENSE"
+      ],
+      "credits": 0,
+      "eval": 90,
+      "status": "shipped"
+    },
+    {
+      "id": "s-20260615-ant",
+      "date": "2026-06-15",
+      "harness": "antigravity",
+      "repo": "repo-b",
+      "scope": "Refactor interface components for simplicity",
+      "files": [
+        "index.html",
+        "style.css"
+      ],
+      "credits": 0,
+      "eval": 85,
+      "status": "shipped"
+    },
+    {
+      "id": "s-20260614-cla",
+      "date": "2026-06-14",
+      "harness": "claude-code",
+      "repo": "repo-a",
+      "scope": "Implement core test suite and CI validation",
+      "files": [
+        "test/suite.js"
+      ],
+      "credits": 0,
+      "eval": 80,
+      "status": "shipped"
+    }
+  ],
+  "prompts": [
+    {
+      "id": "p-1",
+      "date": "2026-06-16",
+      "harness": "claude-code",
+      "label": "Setup repository structure and ignore files",
+      "model_graded": "n/a",
+      "eval": 90,
+      "category": "ops",
+      "notes": "Initial setup"
+    },
+    {
+      "id": "p-2",
+      "date": "2026-06-15",
+      "harness": "antigravity",
+      "label": "Refactor page style.css styling",
+      "model_graded": "n/a",
+      "eval": 85,
+      "category": "style",
+      "notes": "Clean style sheet"
+    }
+  ],
+  "evals": {
+    "rubric": "evals/RUBRIC.md",
+    "grader_model": "haiku",
+    "history": [
+      {
+        "date": "2026-06-15",
+        "score": 85,
+        "dim": "correctness",
+        "harness": "antigravity"
+      },
+      {
+        "date": "2026-06-16",
+        "score": 90,
+        "dim": "correctness",
+        "harness": "claude-code"
+      }
+    ],
+    "note": "Standardized agent rubric results."
+  },
+  "portfolio": {
+    "brands": [
+      {
+        "name": "BrandA",
+        "role": "Primary product",
+        "color": "tech",
+        "revenue": "SaaS subscription",
+        "repos": 4,
+        "deploys": [
+          "example.com"
+        ]
+      },
+      {
+        "name": "BrandB",
+        "role": "Open source tool",
+        "color": "soul",
+        "revenue": "donations",
+        "repos": 2,
+        "deploys": []
+      }
+    ],
+    "deploys": [
+      {
+        "domain": "example.com",
+        "host": "Vercel",
+        "repo": "repo-a",
+        "stack": "Next.js",
+        "status": "live"
+      }
+    ]
+  },
+  "projects": [
+    {
+      "id": "pr-1",
+      "name": "Project Alpha",
+      "brand": "BrandA",
+      "tracker": "Linear",
+      "stack": "React",
+      "status": "in-progress",
+      "blocker": null,
+      "cost_mo_usd": 40
+    },
+    {
+      "id": "pr-2",
+      "name": "Project Beta",
+      "brand": "BrandB",
+      "tracker": "GitHub",
+      "stack": "Node.js",
+      "status": "planning",
+      "blocker": null,
+      "cost_mo_usd": 0
+    }
+  ],
+  "costs": {
+    "currency": "USD",
+    "monthly": [
+      {
+        "category": "Hosting",
+        "amount": 40,
+        "notes": "Vercel plan"
+      },
+      {
+        "category": "APIs",
+        "amount": 80,
+        "notes": "Model provider APIs"
+      }
+    ],
+    "projection_note": "Sample costs projection."
+  },
+  "review": {
+    "cadence": "Weekly review",
+    "interconnectedness_note": "Sample connection mapping.",
+    "next_review": "2026-06-21"
+  }
+};
+
+let S = FALLBACK;
+const $ = s => document.querySelector(s);
+const el = (t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const sevIc = {high:"🔴",med:"🟡",low:"🔵"};
+const cmap = {tech:"p-green",soul:"p-yellow",arc:"p-gold",active:"p-green",idle:"p-gray",experimental:"p-violet",shipped:"p-green","in-progress":"p-blue",building:"p-blue",live:"p-green",reconcile:"p-yellow"};
+const pill = (t,k)=>`<span class="pill ${cmap[k]||'p-gray'}">${t}</span>`;
+
+function render(){
+  // clock + meta
+  $("#f-gen").textContent = "snapshot "+S.meta.generated;
+  // attention
+  const a=$("#attention"); a.innerHTML="";
+  S.attention.forEach(x=>{
+    a.appendChild(el("div","att "+x.sev,
+      `<div class="ic">${sevIc[x.sev]}</div>
+       <div class="body"><div class="repo">${x.repo}</div>
+         <div class="what">${x.what}</div><div class="act">→ ${x.action}</div></div>
+       <div class="meta">${x.owner}<br>${x.since}</div>`));
+  });
+  // kpis
+  const k=S.kpis, kp=$("#kpis"); kp.innerHTML="";
+  const cards=[
+    ["repos_total","Repos",k.repos_total,`${k.repos_active} active · ${k.repos_attention} need attention`,"flat"],
+    ["sessions_7d","Sessions / 7d",k.sessions_7d,"agent runs logged","up"],
+    ["prompts_logged","Prompts logged",k.prompts_logged,"experiment log","up"],
+    ["eval_avg_30d","Eval avg / 30d",k.eval_avg_30d,"virality baseline","flat"],
+    ["open_followups","Open follow-ups",k.open_followups,"across sessions","down"],
+    ["deploys_live","Deploys live",k.deploys_live,"Vercel + Railway","up"],
+    ["monthly_run_cost_usd","Run cost / mo","$"+k.monthly_run_cost_usd,"all infra + models","flat"],
+    ["repos_attention","Attention","⚑ "+k.repos_attention,"drift / blockers","down"]
+  ];
+  cards.forEach(([id,l,n,d,dir])=>kp.appendChild(el("div","card kpi",
+    `<div class="n">${n}</div><div class="l">${l}</div><div class="d ${dir}">${d}</div>`)));
+  // eval spark
+  const ev=S.evals.history.map(h=>h.score); const mx=Math.max(...ev,60);
+  $("#eval-spark").innerHTML = ev.map(v=>`<i style="height:${Math.round(v/mx*100)}%" title="${v}"></i>`).join("");
+  $("#eval-tag").textContent = "avg "+S.kpis.eval_avg_30d+" · "+ev.length+" runs";
+  // cost bars (overview)
+  const cb=$("#cost-bars"); cb.innerHTML=""; const ctot=S.costs.monthly.reduce((s,c)=>s+c.amount,0);
+  S.costs.monthly.slice().sort((a,b)=>b.amount-a.amount).forEach(c=>{
+    cb.appendChild(el("div","",
+      `<div class="row" style="justify-content:space-between"><span style="font-size:12px">${c.category}</span><span class="mono" style="font-size:11px;color:var(--muted)">$${c.amount}</span></div>
+       <div class="bar"><i style="width:${Math.round(c.amount/ctot*100)}%"></i></div>`));
+  });
+
+  // fleet
+  const f=$("#fleet-cards"); f.innerHTML="";
+  S.harnesses.forEach(h=>{
+    f.appendChild(el("div","card agent",
+      `<div class="hd"><div><div class="nm">${h.name}</div><div class="mdl">${h.model}</div></div>${pill(h.status,h.status)}</div>
+       <div class="rl">${h.role}</div>
+       <div class="stats">
+         <span><b>${h.sessions_7d}</b>7d runs</span>
+         <span><b>${h.eval_avg||'—'}</b>eval</span>
+         <span><b>$${h.cost_30d_usd}</b>30d</span>
+         <span><b>${h.tier}</b>tier</span>
+       </div>`));
+  });
+  $("#routing").innerHTML = [
+    ["Substrate / architecture / governance","Claude Code (Opus)","Irreversible, high-leverage; board-gated"],
+    ["Visual production (image/video)","Codex → Higgsfield, Antigravity → NB2","Official hosts; draft free, finalize premium"],
+    ["Parallel repo/code swarm","Antigravity","Native swarm + free NB2 images"],
+    ["Research / trends / drafts","Grok","X-trend mining + free Imagine drafts"],
+    ["Quick low-latency edits","OpenCode","Fast passes, cheap"],
+    ["Ingest / eval grading / summaries","Haiku (any harness)","High-volume plumbing at ~$0.001/pass"]
+  ].map(r=>`<tr><td>${r[0]}</td><td class="mono" style="color:var(--tech2)">${r[1]}</td><td style="color:var(--muted)">${r[2]}</td></tr>`).join("");
+
+  // sessions
+  $("#sessions-body").innerHTML = S.sessions.map(s=>
+    `<tr><td class="mono">${s.date}</td><td>${pill(hName(s.harness),'p-blue')}</td>
+     <td class="mono" style="font-size:11px">${s.repo}</td>
+     <td style="max-width:280px">${s.scope}${s.note?`<br><span class="tag">⚠ ${s.note}</span>`:''}</td>
+     <td class="tag">${(s.files||[]).length} files</td>
+     <td class="mono">${s.credits?s.credits+'cr':'—'}</td>
+     <td class="mono">${evalPill(s.eval)}</td>
+     <td>${pill(s.status,s.status)}</td></tr>`).join("");
+
+  // prompts
+  $("#prompts-body").innerHTML = S.prompts.map(p=>
+    `<tr><td class="mono">${p.date}</td><td>${pill(hName(p.harness),'p-blue')}</td>
+     <td style="max-width:300px">${p.label}</td><td class="tag">${p.category}</td>
+     <td class="mono">${evalPill(p.eval)}</td><td style="color:var(--muted);font-size:11.5px">${p.notes||''}</td></tr>`).join("");
+  $("#rubric-card").innerHTML =
+    `<div class="row" style="justify-content:space-between"><b style="font-size:13px">Standardized agent-output rubric</b><span class="badge">grader: ${S.evals.grader_model}</span></div>
+     <table style="margin-top:10px"><thead><tr><th>Dimension</th><th>What it measures</th><th>Weight</th></tr></thead><tbody>
+     ${[["Correctness","Does it satisfy the stated success criterion? Tests/types/runtime agree.","35%"],
+        ["Scope discipline","Touched only what was asked; no speculative abstractions or drive-by refactors.","20%"],
+        ["Verification","Did the agent check its own work (tests, diff, screenshot) before handover?","20%"],
+        ["Style fit","Matches repo conventions + CLAUDE.md; concise output.","15%"],
+        ["Handover quality","Clean state, files-touched list, next-step clarity.","10%"]]
+        .map(r=>`<tr><td><b>${r[0]}</b></td><td style="color:var(--muted)">${r[1]}</td><td class="mono" style="color:var(--tech)">${r[2]}</td></tr>`).join("")}
+     </tbody></table>
+     <div class="hint" style="margin-top:11px">${S.evals.note}</div>`;
+
+  // portfolio
+  const bc=$("#brand-cards"); bc.innerHTML="";
+  S.portfolio.brands.forEach(b=>{
+    bc.appendChild(el("div","card",
+      `<div class="row" style="justify-content:space-between"><b>${b.name}</b><span class="mono tag">${b.repos} repos</span></div>
+       <div class="hint" style="margin:6px 0 8px">${b.role}</div>
+       <div class="row"><span class="pill ${cmap[b.color]||'p-gray'}">${b.revenue}</span></div>
+       ${b.deploys.length?`<div class="tag" style="margin-top:9px">▲ ${b.deploys.join(' · ')}</div>`:''}`));
+  });
+  $("#deploys-body").innerHTML = S.portfolio.deploys.map(d=>
+    `<tr><td class="mono" style="color:var(--tech2)">${d.domain}</td><td>${pill(d.host,d.host==='Vercel'?'p-blue':'p-violet')}</td>
+     <td class="mono" style="font-size:11px">${d.repo}</td><td style="color:var(--muted)">${d.stack}</td><td>${pill(d.status,d.status)}</td></tr>`).join("");
+
+  // projects
+  $("#projects-body").innerHTML = S.projects.map(p=>
+    `<tr><td><b>${p.name}</b></td><td class="tag">${p.brand}</td><td>${pill(p.tracker,'p-gray')}</td>
+     <td style="color:var(--muted);font-size:11.5px">${p.stack}</td><td>${pill(p.status,p.status)}</td>
+     <td>${p.blocker?`<span class="pill p-red">${p.blocker}</span>`:'<span class="tag">—</span>'}</td>
+     <td class="mono">$${p.cost_mo_usd}</td></tr>`).join("");
+  $("#costs-body").innerHTML = S.costs.monthly.map(c=>
+    `<tr><td>${c.category}</td><td class="mono" style="color:var(--tech)">$${c.amount}</td><td style="color:var(--muted);font-size:11.5px">${c.notes}</td></tr>`).join("")
+    + `<tr><td><b>Total</b></td><td class="mono" style="color:var(--soul)"><b>$${ctot}</b></td><td></td></tr>`;
+  $("#cost-note").textContent = S.costs.projection_note;
+
+  // workflow
+  const steps=[
+    ["01","Session start","Agent reads state.json + reality.md + repo, declares scope on a branch.","SESSION-START.md"],
+    ["02","Work","One agent = one branch. Git is the coordination layer.","any harness"],
+    ["03","Handover","Agent emits standard handover: scope, files, cost, next steps.","HANDOVER.md"],
+    ["04","Ingest","Paste → Haiku parses to a ledger row + drops raw md.","INGEST · Haiku"],
+    ["05","Grade","Output scored against rubric; disagreement → Sonnet.","RUBRIC · Haiku"],
+    ["06","Log","Row appended to state.json; PROGRESS.md updated; follow-ups → Linear.","ledger + Linear"],
+    ["07","Review","Weekly palace review reads the ledger; winners become standard prompts.","Sunday · Opus"]
+  ];
+  $("#flow").innerHTML = steps.map(s=>
+    `<div class="step"><div class="no">${s[0]}</div><div class="ti">${s[1]}</div><div class="de">${s[2]}</div><div class="who">${s[3]}</div></div>`).join("");
+  $("#review-card").innerHTML =
+    `<div class="row" style="justify-content:space-between"><b style="font-size:13px">Review cadence</b><span class="badge">next: ${S.review.next_review}</span></div>
+     <div class="hint" style="margin:8px 0">${S.review.cadence}</div>
+     <div class="hint" style="border-top:1px solid var(--border);padding-top:9px"><b style="color:var(--ink)">Interconnectedness:</b> ${S.review.interconnectedness_note}</div>`;
+}
+
+function hName(id){const h=(S.harnesses||[]).find(x=>x.id===id);return h?h.name:id;}
+function evalPill(v){ if(v==null) return '<span class="tag">—</span>';
+  const k = v>=70?'p-green':v>=45?'p-yellow':'p-red'; return `<span class="pill ${k}">${v}</span>`; }
+
+// nav
+function go(p){
+  document.querySelectorAll(".navlink").forEach(n=>n.classList.toggle("on",n.dataset.p===p));
+  document.querySelectorAll(".page").forEach(s=>s.classList.toggle("on",s.id===p));
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+document.querySelectorAll(".navlink").forEach(n=>n.addEventListener("click",()=>go(n.dataset.p)));
+
+// ingest
+function ingest(){
+  const txt=$("#i-text").value.trim(); if(!txt){$("#i-out").textContent="// paste a handover first";return;}
+  const harness=$("#i-harness").value, repo=$("#i-repo").value.trim()||"unknown";
+  const today=new Date().toISOString().slice(0,10);
+  // heuristic extraction (Haiku does this better in-session; this is the offline shim)
+  const files=[...txt.matchAll(/`([^`]+\.[a-z0-9]{2,5})`/gi)].map(m=>m[1]).slice(0,8);
+  const credits=(txt.match(/spent\s+([\d.]+)\s*credit/i)||txt.match(/([\d.]+)\s*credits?\b/i)||[])[1];
+  const evalM=(txt.match(/overall\s+(\d+)/i)||txt.match(/score[:\s]+(\d+)/i)||[])[1];
+  const firstLine=(txt.split("\n").find(l=>l.trim().length>8)||"").replace(/^#+\s*/,"").slice(0,140);
+  const entry={ id:`s-${today.replace(/-/g,'')}-${harness.slice(0,3)}`, date:today, harness, repo,
+    scope:firstLine, files, credits:credits?Number(credits):0, eval:evalM?Number(evalM):null, status:"shipped",
+    handover:`command-center/handovers/${today}-${harness}.md` };
+  $("#i-out").textContent = JSON.stringify(entry,null,2);
+}
+function copyOut(){const t=$("#i-out").textContent;navigator.clipboard&&navigator.clipboard.writeText(t);}
+
+// clock
+function tick(){const d=new Date();
+  $("#t-time").textContent=d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  $("#t-date").textContent=d.toLocaleDateString([], {weekday:'short',month:'short',day:'numeric'});}
+setInterval(tick,1000); tick();
+
+// try live state.json, else fallback
+fetch("state.json").then(r=>r.ok?r.json():Promise.reject()).then(j=>{S=j;render();}).catch(()=>render());
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Starlight Command Center — Live</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+<style>
+  :root{color-scheme:dark;
+    --void:#0a0a0b;--space:#111113;--elevated:#1a1a1f;--border:#1f1f24;--border-strong:#2c2c33;
+    --tech:#10b981;--tech2:#06b6d4;--soul:#f59e0b;--arc:#c5a26f;
+    --ink:#f3f4f8;--muted:#a0a3b0;--subtle:#6f7280;--faint:#474955;
+    --green:#10b981;--yellow:#d2a84a;--red:#e0655a;--blue:#06b6d4;--violet:#9a7bef;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1100px 700px at 80% -12%,#14241f 0,transparent 55%),radial-gradient(900px 600px at 8% 112%,#1c1707 0,transparent 50%),var(--void);color:var(--ink);font:13.5px/1.5 var(--sans);padding:20px 22px 60px}
+  a{color:var(--tech2);text-decoration:none}
+  .head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:6px}
+  .ttl{display:flex;align-items:center;gap:11px}
+  .logo{width:30px;height:30px;border-radius:8px;background:conic-gradient(from 200deg,var(--tech),var(--tech2),var(--soul),var(--tech));box-shadow:0 0 16px rgba(16,185,129,.4)}
+  h1{font-size:20px;margin:0}
+  h1 b{background:linear-gradient(90deg,var(--tech),var(--tech2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .live{font-family:var(--mono);font-size:10.5px;color:var(--subtle);display:flex;align-items:center;gap:6px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--faint)}
+  .dot.on{background:var(--tech);box-shadow:0 0 8px var(--tech);animation:pulse 2s infinite}
+  @keyframes pulse{50%{opacity:.4}}
+  .sub{color:var(--muted);font-size:12px;margin:0 0 16px}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;border-bottom:1px solid var(--border);padding-bottom:10px}
+  .tab{padding:6px 13px;border-radius:8px;color:var(--muted);cursor:pointer;font-size:12.5px;border:1px solid transparent}
+  .tab:hover{background:var(--space);color:var(--ink)}
+  .tab.on{background:linear-gradient(90deg,rgba(16,185,129,.16),rgba(6,182,212,.05));color:#fff;border-color:rgba(16,185,129,.3)}
+  .page{display:none}.page.on{display:block;animation:fade .2s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  h2{font-size:11px;text-transform:uppercase;letter-spacing:1.4px;color:var(--tech2);margin:24px 0 11px;display:flex;align-items:center;gap:8px}
+  h2::before{content:"";width:13px;height:1px;background:var(--tech2);opacity:.6}
+  h2:first-child{margin-top:4px}
+  .grid{display:grid;gap:11px}
+  .k5{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+  .k3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  .k2{grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
+  .card{background:linear-gradient(180deg,var(--space),var(--void));border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+  .kpi .n{font-size:24px;font-weight:700;font-family:var(--mono);letter-spacing:-.5px}
+  .kpi .l{color:var(--subtle);font-size:10px;text-transform:uppercase;letter-spacing:.7px;margin-top:3px}
+  .kpi .d{font-size:10.5px;margin-top:5px;color:var(--subtle)}
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:top}
+  th{color:var(--subtle);font-weight:600;font-size:9px;text-transform:uppercase;letter-spacing:.9px}
+  tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:rgba(255,255,255,.018)}
+  .tbl{background:linear-gradient(180deg,var(--space),var(--void));border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .mono{font-family:var(--mono)}
+  .pill{display:inline-block;padding:2px 8px;border-radius:30px;font-size:10px;font-weight:600;white-space:nowrap;font-family:var(--mono)}
+  .p-green{background:rgba(16,185,129,.14);color:var(--green)}
+  .p-yellow{background:rgba(210,168,74,.16);color:var(--yellow)}
+  .p-red{background:rgba(224,101,90,.15);color:var(--red)}
+  .p-blue{background:rgba(6,182,212,.14);color:var(--blue)}
+  .p-violet{background:rgba(154,123,239,.15);color:var(--violet)}
+  .p-gray{background:rgba(255,255,255,.05);color:var(--subtle)}
+  .today{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:11px;margin-bottom:6px}
+  .tcard{background:linear-gradient(155deg,rgba(224,101,90,.10),var(--space));border:1px solid rgba(224,101,90,.3);border-radius:13px;padding:15px 16px;position:relative;overflow:hidden}
+  .tcard.n2{background:linear-gradient(155deg,rgba(224,101,90,.07),var(--space))}
+  .tcard .rank{font-family:var(--mono);font-size:10px;color:var(--red);font-weight:700;letter-spacing:1px}
+  .tcard .repo{font-family:var(--mono);font-size:12.5px;font-weight:700;margin:3px 0 5px}
+  .tcard .what{font-size:12.5px;color:var(--ink)}
+  .tcard .act{font-size:11.5px;color:var(--muted);margin-top:7px;border-top:1px solid var(--border);padding-top:7px}
+  .att{display:flex;gap:11px;align-items:flex-start;padding:11px 13px;border-radius:10px;border:1px solid var(--border);background:var(--space);margin-bottom:8px;border-left-width:3px}
+  .att.high{border-left-color:var(--red)}.att.med{border-left-color:var(--yellow)}.att.low{border-left-color:var(--blue)}
+  .att .body{flex:1;min-width:0}
+  .att .repo{font-family:var(--mono);font-size:11.5px;font-weight:600}
+  .att .what{font-size:12px;margin:1px 0}.att .act{font-size:11px;color:var(--muted)}
+  .att .meta{font-size:9.5px;color:var(--subtle);text-align:right;font-family:var(--mono)}
+  .chwrap{position:relative;height:188px}
+  .fleet{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:11px}
+  .agent .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .agent .nm{font-weight:700;font-size:13.5px}.agent .mdl{font-family:var(--mono);font-size:10px;color:var(--subtle)}
+  .agent .rl{font-size:11px;color:var(--muted);min-height:30px;margin:5px 0 9px}
+  .agent .stats{display:flex;gap:13px;font-family:var(--mono);font-size:10.5px;color:var(--subtle)}
+  .agent .stats b{display:block;color:var(--ink);font-size:13px}
+  .flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:9px}
+  .step{background:var(--space);border:1px solid var(--border);border-radius:10px;padding:11px}
+  .step .no{font-family:var(--mono);font-size:9.5px;color:var(--tech);font-weight:700}
+  .step .ti{font-weight:600;font-size:12px;margin:3px 0 4px}.step .de{font-size:10.5px;color:var(--muted)}
+  .step .who{font-family:var(--mono);font-size:9px;color:var(--subtle);margin-top:7px}
+  .lead{color:var(--muted);font-size:12.5px;border-left:2px solid var(--tech);padding-left:12px;margin:0 0 16px;max-width:820px}
+  .err{color:var(--red);font-family:var(--mono);font-size:11px}
+  .loading{color:var(--subtle);font-family:var(--mono);font-size:11px}
+  .tag{font-family:var(--mono);font-size:9.5px;color:var(--subtle)}
+  textarea,input,select{width:100%;background:var(--void);border:1px solid var(--border-strong);border-radius:9px;color:var(--ink);font:12.5px var(--sans);padding:10px 12px;resize:vertical}
+  .btn{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(90deg,var(--tech),#0c9b6e);color:#04130d;border:none;border-radius:9px;padding:9px 16px;font-weight:700;font-size:12.5px;cursor:pointer}
+  .btn:disabled{opacity:.55}
+  footer{margin-top:30px;border-top:1px solid var(--border);padding-top:12px;color:var(--subtle);font-size:10.5px;font-family:var(--mono)}
+</style>
+</head>
+<body>
+  <div class="head">
+    <div class="ttl"><div class="logo"></div><div><h1>Starlight <b>Command Center</b></h1>
+      <div class="live"><span class="dot" id="ldot"></span><span id="lstatus">connecting to Linear…</span></div></div></div>
+    <div class="live mono" id="now"></div>
+  </div>
+  <p class="sub">One ledger, three faces — narrative SoT in ops-ledger-repo/ops · structured projection here · live Linear overlay.</p>
+
+  <div class="tabs">
+    <div class="tab on" data-p="overview">Overview</div>
+    <div class="tab" data-p="projects">Projects · LIVE</div>
+    <div class="tab" data-p="issues">My Issues · LIVE</div>
+    <div class="tab" data-p="fleet">Agent Fleet</div>
+    <div class="tab" data-p="sessions">Sessions &amp; Evals</div>
+    <div class="tab" data-p="cost">Cost</div>
+    <div class="tab" data-p="workflow">Workflow</div>
+    <div class="tab" data-p="ingest">Ingest · Haiku</div>
+  </div>
+
+  <section class="page on" id="overview">
+    <h2>Today — top 3, do these first</h2><div class="today" id="today"></div>
+    <h2>Pulse</h2><div class="grid k5" id="kpis"></div>
+    <h2>Signals</h2>
+    <div class="grid k3">
+      <div class="card"><div class="tag" style="margin-bottom:8px">EVAL TREND (virality)</div><div class="chwrap"><canvas id="ch-eval"></canvas></div></div>
+      <div class="card"><div class="tag" style="margin-bottom:8px">MONTHLY COST $/mo</div><div class="chwrap"><canvas id="ch-cost"></canvas></div></div>
+      <div class="card"><div class="tag" style="margin-bottom:8px">FLEET ACTIVITY (7d runs)</div><div class="chwrap"><canvas id="ch-fleet"></canvas></div></div>
+    </div>
+    <h2>All attention</h2><div id="attention"></div>
+  </section>
+
+  <section class="page" id="projects">
+    <p class="lead">Live from Linear (team brandc). Active + planned projects, sorted by priority.</p>
+    <h2>Projects</h2><div class="tbl"><table><thead><tr><th>Project</th><th>Status</th><th>Priority</th><th>Target</th><th>Lead</th></tr></thead><tbody id="proj-body"><tr><td colspan="5" class="loading">loading…</td></tr></tbody></table></div>
+  </section>
+  <section class="page" id="issues">
+    <p class="lead">Live from Linear — issues assigned to you, urgent first. Overdue flagged red.</p>
+    <h2>My open issues</h2><div class="tbl"><table><thead><tr><th>ID</th><th>Title</th><th>Priority</th><th>Status</th><th>Due</th></tr></thead><tbody id="issue-body"><tr><td colspan="5" class="loading">loading…</td></tr></tbody></table></div>
+  </section>
+  <section class="page" id="fleet">
+    <p class="lead">Six harnesses, one ledger. Each declares scope on its own branch; git is the coordination layer. Draft free, finalize premium, grade on Haiku.</p>
+    <h2>Coding &amp; production fleet</h2><div class="fleet" id="fleet-cards"></div>
+  </section>
+  <section class="page" id="sessions">
+    <p class="lead">Every agent session as a row — paste a /handover in Ingest and Haiku appends it.</p>
+    <h2>Recent sessions</h2><div class="tbl"><table><thead><tr><th>Date</th><th>Harness</th><th>Repo</th><th>Scope</th><th>Cost</th><th>Eval</th><th>Status</th></tr></thead><tbody id="sess-body"></tbody></table></div>
+  </section>
+  <section class="page" id="cost">
+    <h2>Monthly run cost</h2><div class="grid k2"><div class="card" id="cost-card"></div><div class="card"><div class="tag" style="margin-bottom:8px">SHARE OF SPEND</div><div class="chwrap" style="height:230px"><canvas id="ch-cost2"></canvas></div></div></div>
+    <h2>Model routing = the cost lever</h2>
+    <div class="grid k3">
+      <div class="card"><b class="mono" style="color:var(--tech)">HAIKU</b><div class="tag" style="margin-top:6px;color:var(--muted)">Ops-sweep, ingest, grade, summarize. ~$0.001/pass. Runs in this artifact.</div></div>
+      <div class="card"><b class="mono" style="color:var(--soul)">SONNET</b><div class="tag" style="margin-top:6px;color:var(--muted)">Synthesis, drafting, mid-complexity code. Daily-build chat.</div></div>
+      <div class="card"><b class="mono" style="color:var(--blue)">OPUS</b><div class="tag" style="margin-top:6px;color:var(--muted)">Architecture, governance, irreversible calls. This chat.</div></div>
+    </div>
+  </section>
+  <section class="page" id="workflow">
+    <p class="lead">Session lifecycle. Cheap models plumb; expensive models think. SoT = ops-ledger-repo/ops/OPS-LEDGER.md.</p>
+    <h2>Lifecycle</h2><div class="flow" id="flow"></div>
+  </section>
+  <section class="page" id="ingest">
+    <p class="lead">Paste a /handover. Parsed + graded by <b style="color:var(--tech)">Haiku</b> in-artifact (~$0.001) — never touches your Opus chat. Copy the JSON into state.json → sessions[].</p>
+    <h2>Handover → ledger row · Haiku</h2>
+    <div class="grid k2">
+      <div>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <select id="i-harness" style="flex:0 0 130px"><option value="claude-code">Claude Code</option><option value="codex">Codex</option><option value="antigravity">Antigravity</option><option value="grok">Grok</option><option value="opencode">OpenCode</option><option value="deepagents">deepagents</option></select>
+          <input id="i-repo" placeholder="repo" style="flex:1">
+        </div>
+        <textarea id="i-text" rows="13" placeholder="Paste the /handover output here…"></textarea>
+        <button class="btn" id="i-btn" style="margin-top:9px">⊕ Parse &amp; grade on Haiku</button>
+      </div>
+      <div>
+        <div class="tag" style="margin-bottom:7px">Output (Haiku):</div>
+        <pre id="i-out" style="background:var(--void);border:1px solid var(--border);border-radius:10px;padding:13px;font-family:var(--mono);font-size:11px;white-space:pre-wrap;color:var(--tech2);max-height:380px;overflow:auto">// paste a handover, then run</pre>
+      </div>
+    </div>
+  </section>
+
+  <footer>SoT: ops-ledger-repo/ops/OPS-LEDGER.md · this = structured projection · live Linear overlay · Haiku ingest · snapshot <span id="f-gen"></span></footer>
+
+<script>
+const LEDGER = {
+  "meta": {
+    "version": "1.0.0",
+    "generated": "2026-06-16",
+    "owner": "operator",
+    "note": "Sample operational ledger for the Command Center template."
+  },
+  "kpis": {
+    "repos_total": 12,
+    "repos_active": 8,
+    "repos_attention": 2,
+    "sessions_7d": 4,
+    "prompts_logged": 3,
+    "eval_avg_30d": 85.0,
+    "open_followups": 3,
+    "deploys_live": 2,
+    "monthly_run_cost_usd": 120
+  },
+  "attention": [
+    {
+      "sev": "high",
+      "repo": "repo-a",
+      "what": "Local branch is out of sync with origin",
+      "act": "git pull origin main and reconcile",
+      "owner": "operator",
+      "since": "2026-06-15"
+    },
+    {
+      "sev": "med",
+      "repo": "repo-b",
+      "what": "Uncommitted changes in workflow module",
+      "act": "Commit and push current changes",
+      "owner": "agent",
+      "since": "2026-06-16"
+    }
+  ],
+  "harnesses": [
+    {
+      "id": "claude-code",
+      "name": "Claude Code",
+      "model": "Sonnet",
+      "role": "Primary development partner",
+      "status": "active",
+      "sessions_7d": 3,
+      "eval_avg": 88.0,
+      "cost_30d_usd": 40,
+      "tier": "primary"
+    },
+    {
+      "id": "antigravity",
+      "name": "Antigravity",
+      "model": "Gemini",
+      "role": "Swarm orchestration partner",
+      "status": "active",
+      "sessions_7d": 1,
+      "eval_avg": 82.0,
+      "cost_30d_usd": 0,
+      "tier": "swarm"
+    }
+  ],
+  "sessions": [
+    {
+      "date": "2026-06-16",
+      "harness": "claude-code",
+      "repo": "repo-a",
+      "scope": "Setup basic template repository and structure",
+      "credits": 0,
+      "eval": 90,
+      "status": "shipped"
+    },
+    {
+      "date": "2026-06-15",
+      "harness": "antigravity",
+      "repo": "repo-b",
+      "scope": "Refactor interface components for simplicity",
+      "credits": 0,
+      "eval": 85,
+      "status": "shipped"
+    },
+    {
+      "date": "2026-06-14",
+      "harness": "claude-code",
+      "repo": "repo-a",
+      "scope": "Implement core test suite and CI validation",
+      "credits": 0,
+      "eval": 80,
+      "status": "shipped"
+    }
+  ],
+  "evalHistory": [
+    {
+      "d": "06-14",
+      "v": 80
+    },
+    {
+      "d": "06-15",
+      "v": 85
+    },
+    {
+      "d": "06-16",
+      "v": 90
+    }
+  ],
+  "costs": {
+    "currency": "USD",
+    "monthly": [
+      {
+        "category": "Hosting",
+        "amount": 40,
+        "notes": "Vercel plan"
+      },
+      {
+        "category": "APIs",
+        "amount": 80,
+        "notes": "Model provider APIs"
+      }
+    ],
+    "projection_note": "Sample costs projection."
+  }
+};
+
+const $=s=>document.querySelector(s),el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const cmap={active:"p-green",idle:"p-gray",experimental:"p-violet",shipped:"p-green",started:"p-green",planned:"p-blue",backlog:"p-gray",unstarted:"p-yellow",completed:"p-green"};
+const pill=(t,k)=>'<span class="pill '+(cmap[k]||'p-gray')+'">'+(t||'—')+'</span>';
+const prioMap={1:["Urgent","p-red"],2:["High","p-yellow"],3:["Med","p-blue"],4:["Low","p-gray"],0:["—","p-gray"]};
+const prio=v=>{const m=prioMap[v]||prioMap[0];return '<span class="pill '+m[1]+'">'+m[0]+'</span>';};
+const esc=s=>(s||"").replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const today=new Date().toISOString().slice(0,10);
+
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x===t));
+  document.querySelectorAll(".page").forEach(p=>p.classList.toggle("on",p.id===t.dataset.p));
+});
+function hName(id){const h=LEDGER.harnesses.find(x=>x.id===id);return h?h.name:id;}
+function evalP(v){if(v==null)return '<span class="tag">—</span>';const k=v>=70?'p-green':v>=45?'p-yellow':'p-red';return '<span class="pill '+k+'">'+v+'</span>';}
+
+function renderLedger(){
+  $("#f-gen").textContent=LEDGER.meta.generated;
+  const hi=LEDGER.attention.filter(x=>x.sev==="high").slice(0,3), t=$("#today"); t.innerHTML="";
+  hi.forEach((x,i)=>t.appendChild(el("div","tcard"+(i>0?" n2":""),
+    '<div class="rank">PRIORITY '+(i+1)+'</div><div class="repo">'+esc(x.repo)+'</div><div class="what">'+esc(x.what)+'</div><div class="act">→ '+esc(x.act)+'</div>')));
+  const a=$("#attention");a.innerHTML="";
+  LEDGER.attention.forEach(x=>a.appendChild(el("div","att "+x.sev,
+    '<div class="body"><div class="repo">'+esc(x.repo)+'</div><div class="what">'+esc(x.what)+'</div><div class="act">→ '+esc(x.act)+'</div></div><div class="meta">'+esc(x.owner)+'<br>'+esc(x.since)+'</div>')));
+  const f=$("#fleet-cards");f.innerHTML="";
+  LEDGER.harnesses.forEach(h=>f.appendChild(el("div","card agent",
+    '<div class="hd"><div><div class="nm">'+esc(h.name)+'</div><div class="mdl">'+esc(h.model)+'</div></div>'+pill(h.status,h.status)+'</div>'+
+    '<div class="rl">'+esc(h.role)+'</div><div class="stats"><span><b>'+h.sessions_7d+'</b>7d</span><span><b>'+(h.eval_avg||'—')+'</b>eval</span><span><b>$'+h.cost_30d_usd+'</b>30d</span><span><b>'+h.tier+'</b>tier</span></div>')));
+  $("#sess-body").innerHTML=LEDGER.sessions.map(s=>
+    '<tr><td class="mono">'+s.date+'</td><td>'+pill(hName(s.harness),'p-blue')+'</td><td class="mono" style="font-size:10.5px">'+esc(s.repo)+'</td>'+
+    '<td style="max-width:320px">'+esc(s.scope)+'</td><td class="mono">'+(s.credits?s.credits+'cr':'—')+'</td><td class="mono">'+evalP(s.eval)+'</td><td>'+pill(s.status,s.status)+'</td></tr>').join("");
+  const c=LEDGER.costs.monthly.slice().sort((a,b)=>b.amount-a.amount),tot=c.reduce((s,x)=>s+x.amount,0);
+  $("#cost-card").innerHTML=c.map(x=>'<div style="display:flex;justify-content:space-between;font-size:12px"><span>'+esc(x.category)+'</span><span class="mono" style="color:var(--muted)">$'+x.amount+'</span></div><div style="height:6px;border-radius:6px;background:var(--elevated);overflow:hidden;margin-top:5px"><i style="display:block;height:100%;width:'+Math.round(x.amount/tot*100)+'%;background:linear-gradient(90deg,var(--tech),var(--tech2))"></i></div>').join("")
+    +'<div style="display:flex;justify-content:space-between;margin-top:10px;font-weight:700"><span>Total</span><span class="mono" style="color:var(--soul)">$'+tot+'/mo</span></div>';
+  $("#flow").innerHTML=[["01","Start","Read ledger + reality.md + repo; declare scope on a branch.","SESSION-START"],["02","Work","One agent = one branch. Git coordinates.","any harness"],["03","Handover","Emit /handover: files, research, cost, next.","HANDOVER"],["04","Ingest/Sweep","Handover → /ops-sweep (git-delta) → ledger.","Haiku"],["05","Grade","Score vs rubric; escalate to Sonnet if unsure.","Haiku"],["06","Log","OPS-LEDGER + state.json; follow-ups → Linear.","ledger+Linear"],["07","Review","Weekly: winners become standard prompts.","Sunday·Opus"]]
+    .map(s=>'<div class="step"><div class="no">'+s[0]+'</div><div class="ti">'+s[1]+'</div><div class="de">'+s[2]+'</div><div class="who">'+s[3]+'</div></div>').join("");
+}
+
+function drawCharts(){
+  if(typeof Chart==="undefined")return;
+  const ink="#a0a3b0",grid="rgba(255,255,255,.05)";
+  Chart.defaults.color=ink;Chart.defaults.font.family="ui-monospace,Menlo,monospace";Chart.defaults.font.size=10;
+  const eh=LEDGER.evalHistory;
+  new Chart($("#ch-eval"),{type:"line",data:{labels:eh.map(x=>x.d),datasets:[{data:eh.map(x=>x.v),borderColor:"#10b981",backgroundColor:"rgba(16,185,129,.12)",fill:true,tension:.35,pointRadius:3,pointBackgroundColor:"#10b981"}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{suggestedMin:40,suggestedMax:60,grid:{color:grid}},x:{grid:{display:false}}}}});
+  const cm=LEDGER.costs.monthly,pal=["#10b981","#06b6d4","#f59e0b","#c5a26f","#9a7bef","#e0655a","#6f7280"];
+  const costCfg=t=>({type:t,data:{labels:cm.map(x=>x.category),datasets:[{data:cm.map(x=>x.amount),backgroundColor:pal,borderColor:"#0a0a0b",borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"right",labels:{boxWidth:9,font:{size:9}}}},cutout:"58%"}});
+  new Chart($("#ch-cost"),costCfg("doughnut"));
+  new Chart($("#ch-cost2"),costCfg("doughnut"));
+  const fl=LEDGER.harnesses;
+  new Chart($("#ch-fleet"),{type:"bar",data:{labels:fl.map(h=>h.name.split(" ")[0]),datasets:[{data:fl.map(h=>h.sessions_7d),backgroundColor:"#06b6d4",borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:grid},ticks:{stepSize:1}},x:{grid:{display:false}}}}});
+}
+
+async function mcp(name,args){const r=await window.cowork.callMcpTool(name,args||{});if(r.isError)throw new Error(name);return r.structuredContent ?? JSON.parse(r.content[0].text);}
+const LIN = "mcp__<CONNECTOR_ID>__";
+async function loadLive(){
+  let projects=[],issues=[];
+  try{
+    const res=await Promise.all([mcp(LIN+"list_projects",{limit:50}),mcp(LIN+"list_issues",{assignee:"me",limit:50,orderBy:"updatedAt"})]);
+    projects=res[0].projects||[];issues=res[1].issues||[];
+    $("#ldot").classList.add("on");$("#lstatus").textContent="Linear live · "+projects.length+" projects · "+issues.length+" issues";
+  }catch(e){$("#lstatus").innerHTML='<span class="err">Linear unavailable — reconnect connector</span>';}
+  const byPrio=(a,b)=>((a.priority&&a.priority.value)||9)-((b.priority&&b.priority.value)||9);
+  const active=projects.filter(p=>p.status&&["started","planned"].includes(p.status.type)).sort(byPrio);
+  $("#proj-body").innerHTML=active.length?active.map(p=>
+    '<tr><td><b>'+esc(p.name)+'</b>'+(p.summary?'<br><span class="tag">'+esc(p.summary).slice(0,90)+'</span>':'')+'</td><td>'+pill(p.status&&p.status.name,p.status&&p.status.type)+'</td><td>'+prio(p.priority&&p.priority.value)+'</td><td class="mono" style="font-size:10.5px">'+(p.targetDate||'—')+'</td><td class="tag">'+esc(p.lead&&p.lead.name||'—')+'</td></tr>').join("")
+    :'<tr><td colspan="5" class="loading">no active projects</td></tr>';
+  const open=issues.filter(x=>!["completed","canceled"].includes(x.statusType)).sort(byPrio);
+  $("#issue-body").innerHTML=open.length?open.map(x=>{const over=x.dueDate&&x.dueDate<today;
+    return '<tr><td class="mono"><a href="'+x.url+'" target="_blank">'+x.id+'</a></td><td style="max-width:380px">'+esc(x.title)+(x.project?'<br><span class="tag">'+esc(x.project)+'</span>':'')+'</td><td>'+prio(x.priority&&x.priority.value)+'</td><td>'+pill(x.status,x.statusType)+'</td><td class="mono" style="font-size:10.5px;color:'+(over?'var(--red)':'var(--subtle)')+'">'+(x.dueDate||'—')+(over?' ⚠':'')+'</td></tr>';}).join("")
+    :'<tr><td colspan="5" class="loading">no open issues</td></tr>';
+  const k=LEDGER.kpis,urgent=open.filter(x=>x.priority&&x.priority.value===1).length,overdue=open.filter(x=>x.dueDate&&x.dueDate<today).length;
+  $("#kpis").innerHTML=[["Active projects",active.length,"Linear · live","var(--tech2)"],["My open issues",open.length,urgent+" urgent · "+overdue+" overdue","var(--soul)"],["Repos",k.repos_total,k.repos_attention+" need attention","var(--ink)"],["Sessions / 7d",k.sessions_7d,"agent runs","var(--ink)"],["Eval avg / 30d",k.eval_avg_30d,"baseline","var(--ink)"],["Deploys live",k.deploys_live,"Vercel + Railway","var(--ink)"],["Run cost / mo","$"+k.monthly_run_cost_usd,"infra+models","var(--ink)"],["Attention","⚑ "+k.repos_attention,"drift / blockers","var(--red)"]]
+    .map(c=>'<div class="card kpi"><div class="n" style="color:'+c[3]+'">'+c[1]+'</div><div class="l">'+c[0]+'</div><div class="d">'+c[2]+'</div></div>').join("");
+}
+async function ingestHaiku(){
+  const txt=$("#i-text").value.trim(),out=$("#i-out");
+  if(!txt){out.textContent="// paste a handover first";return;}
+  if(!(window.cowork&&window.cowork.askClaude)){out.textContent="// askClaude unavailable in this view";return;}
+  const harness=$("#i-harness").value,repo=$("#i-repo").value.trim()||"unknown",btn=$("#i-btn");
+  btn.disabled=true;btn.textContent="running on Haiku…";out.textContent="// Haiku working…";
+  const prompt="You are the Command Center ingest function. Parse the handover into ONE json object and grade it 0-100 against rubric (correctness35/scope20/verification20/style15/handover10). Output ONLY json. Keys: id (s-"+today.replace(/-/g,'')+"-"+harness.slice(0,3)+"), date ("+today+"), harness ("+harness+"), repo ("+repo+"), scope (one line), files (array), credits (number or 0), eval (int), weakest_dim, status (shipped|partial|blocked), next (array), handover (command-center/handovers/"+today+"-"+harness+".md).";
+  try{let r=await window.cowork.askClaude(prompt,[txt]);if(typeof r!=="string")r=r.text||r.content||JSON.stringify(r);const m=r.match(/\{[\s\S]*\}/);out.textContent=m?JSON.stringify(JSON.parse(m[0]),null,2):r;}
+  catch(e){out.textContent="// error: "+(e.message||e);}
+  btn.disabled=false;btn.textContent="⊕ Parse & grade on Haiku";
+}
+function tick(){$("#now").textContent=new Date().toLocaleString([], {weekday:'short',hour:'2-digit',minute:'2-digit'});}
+document.getElementById("i-btn").addEventListener("click",ingestHaiku);
+setInterval(tick,30000);tick();renderLedger();drawCharts();loadLive();
+</script>
+</body>
+</html>

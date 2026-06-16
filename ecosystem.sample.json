@@ -1,0 +1,89 @@
+{
+  "$schema": "https://example.com/schemas/ecosystem.v1.json",
+  "generated": "2026-06-16",
+  "owner": "operator",
+  "note": "Sample ecosystem roadmap.",
+  "thesis": "One operator, three brands, one substrate. Moat architecture.",
+  "brands": {
+    "BrandA": {
+      "domain": "brand-a.com",
+      "role": "Primary user-facing product",
+      "audience": "general users"
+    },
+    "BrandB": {
+      "domain": "brand-b.com",
+      "role": "Developer SDK and tools",
+      "audience": "developers"
+    },
+    "SubstrateX": {
+      "role": "Core infrastructure powering BrandA and BrandB",
+      "audience": "internal"
+    }
+  },
+  "revenueLines": {
+    "platform": {
+      "label": "BrandA SaaS platform",
+      "repos": [
+        "repo-a"
+      ]
+    },
+    "distribution": {
+      "label": "Open source tools",
+      "repos": [
+        "repo-b",
+        "repo-c"
+      ]
+    }
+  },
+  "constellations": {
+    "substrate": {
+      "label": "Substrate Infrastructure",
+      "repos": [
+        "repo-c"
+      ]
+    },
+    "applications": {
+      "label": "Client applications",
+      "repos": [
+        "repo-a",
+        "repo-b"
+      ]
+    }
+  },
+  "repos": [
+    {
+      "name": "repo-a",
+      "brand": "BrandA",
+      "tier": "flagship",
+      "location": "both",
+      "purpose": "Web application interface.",
+      "feeds": [],
+      "dependsOn": [
+        "repo-c"
+      ],
+      "status": "active"
+    },
+    {
+      "name": "repo-b",
+      "brand": "BrandB",
+      "tier": "core",
+      "location": "both",
+      "purpose": "Developer CLI helper.",
+      "feeds": [],
+      "dependsOn": [],
+      "status": "active"
+    },
+    {
+      "name": "repo-c",
+      "brand": "SubstrateX",
+      "tier": "core",
+      "location": "both",
+      "purpose": "Shared database and service connectors.",
+      "feeds": [
+        "repo-a"
+      ],
+      "dependsOn": [],
+      "status": "active"
+    }
+  ]
+}
